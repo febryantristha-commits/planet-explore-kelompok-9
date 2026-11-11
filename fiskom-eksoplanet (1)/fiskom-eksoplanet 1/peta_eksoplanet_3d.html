@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Peta layak huni eksoplanet 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --tinta: #070B1E;
+  --panel: #0E1430;
+  --garis: #26315F;
+  --teks: #EEF1FF;
+  --lembut: #9BA9D8;
+  --kandidat: #F5B841;
+  --tidak: #FF7A6B;
+  --data: #8190B8;
+  --judul: "Fraunces", Georgia, serif;
+  --badan: "Figtree", "Segoe UI", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  background: var(--tinta);
+  color: var(--teks);
+  font-family: var(--badan);
+  font-size: 15px;
+  line-height: 1.5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+header { padding: 22px 28px 6px; }
+h1 {
+  font-family: var(--judul);
+  font-weight: 600;
+  font-size: clamp(24px, 3.2vw, 34px);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin: 0 0 6px;
+}
+header p { margin: 0; color: var(--lembut); max-width: 64ch; }
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; padding: 14px 28px 14px; }
+.tab {
+  font: inherit;
+  color: var(--lembut);
+  background: transparent;
+  border: 1px solid var(--garis);
+  border-radius: 999px;
+  padding: 7px 16px;
+  cursor: pointer;
+  text-align: left;
+  line-height: 1.3;
+}
+.tab:hover { color: var(--teks); border-color: var(--lembut); }
+.tab[aria-pressed="true"] {
+  color: var(--teks);
+  border-color: var(--kandidat);
+  background: rgba(245, 184, 65, 0.12);
+}
+.tab small { display: block; font-size: 12px; color: var(--lembut); }
+.tab:focus-visible, .tombol:focus-visible { outline: 2px solid var(--kandidat); outline-offset: 2px; }
+main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  min-height: 0;
+}
+.panggung {
+  position: relative;
+  min-height: 460px;
+  background: radial-gradient(ellipse at 50% 50%, #141D47 0%, #0A1030 58%, #070B1E 100%);
+  overflow: hidden;
+}
+.panggung canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+}
+.lapis-label { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.huruf, .label-zona {
+  position: absolute;
+  left: 0;
+  top: 0;
+  white-space: nowrap;
+  font: 600 12px var(--badan);
+  color: var(--teks);
+  text-shadow: 0 0 3px #070B1E, 0 0 3px #070B1E, 0 0 6px #070B1E;
+}
+.label-zona { font-weight: 500; color: var(--kandidat); }
+.tip {
+  position: absolute;
+  pointer-events: none;
+  background: var(--panel);
+  border: 1px solid var(--garis);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 13px;
+  line-height: 1.35;
+  opacity: 0;
+  transform: translate(12px, -110%);
+}
+.tip.tampil { opacity: 1; }
+.tip span { display: block; color: var(--lembut); font-size: 12px; }
+.kontrol {
+  position: absolute;
+  left: 20px; right: 20px; bottom: 14px;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px;
+  color: var(--lembut);
+  font-size: 13px;
+  pointer-events: none;
+}
+.tombol {
+  font: inherit;
+  color: var(--teks);
+  background: rgba(14, 20, 48, 0.8);
+  border: 1px solid var(--garis);
+  border-radius: 999px;
+  padding: 5px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  pointer-events: auto;
+}
+.tombol:hover { border-color: var(--lembut); }
+aside {
+  background: var(--panel);
+  border-left: 1px solid var(--garis);
+  padding: 26px 26px 30px;
+  overflow-y: auto;
+}
+aside h2 {
+  font-family: var(--judul);
+  font-weight: 600;
+  font-size: 28px;
+  line-height: 1.15;
+  margin: 0 0 12px;
+}
+aside p { margin: 0 0 14px; max-width: 52ch; }
+.legenda { list-style: none; margin: 18px 0; padding: 0; display: grid; gap: 12px; }
+.legenda li { display: grid; grid-template-columns: 14px 1fr; gap: 10px; align-items: start; }
+.legenda i { width: 12px; height: 12px; border-radius: 50%; margin-top: 5px; }
+.legenda b { display: block; font-weight: 600; }
+.legenda span { color: var(--lembut); font-size: 14px; }
+.kandidat { --w: var(--kandidat); }
+.tidak { --w: var(--tidak); }
+.data { --w: var(--data); }
+.legenda i, .titik { background: var(--w); }
+.chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 3px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--w);
+  color: var(--w);
+  font-weight: 600;
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+.chip i { width: 8px; height: 8px; border-radius: 50%; background: var(--w); }
+.gauge { margin: 20px 0 4px; }
+.gauge-atas { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.gauge-atas span { color: var(--lembut); }
+.gauge-atas strong { font-weight: 600; }
+.bar { position: relative; height: 8px; border-radius: 99px; background: #1C2650; margin: 14px 0 8px; }
+.bar.kosong { background: repeating-linear-gradient(45deg, #1C2650 0 6px, #232E5E 6px 12px); }
+.bar .area { position: absolute; top: -3px; bottom: -3px; background: rgba(245, 184, 65, 0.25); border: 1px solid #F5B841; border-radius: 4px; }
+.bar .titik { position: absolute; top: 50%; width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--panel); transform: translate(-50%, -50%); }
+.gauge-bawah { display: flex; justify-content: space-between; font-size: 12px; color: var(--lembut); }
+.gauge-ket { font-size: 12px; color: var(--lembut); margin: 4px 0 0; }
+dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 18px; margin: 22px 0 0; }
+dt { color: var(--lembut); }
+dd { margin: 0; text-align: right; font-weight: 500; }
+.catatan { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--garis); font-size: 13px; color: var(--lembut); }
+@media (max-width: 900px) {
+  main { grid-template-columns: 1fr; }
+  .panggung { min-height: 0; aspect-ratio: 1 / 1; }
+  aside { border-left: none; border-top: 1px solid var(--garis); }
+  header, .tabs { padding-left: 18px; padding-right: 18px; }
+}
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<header>
+  <h1>Peta layak huni eksoplanet 3D</h1>
+  <p>Pilih sistem bintang, putar dan zoom petanya, lalu klik planet untuk melihat alasan penilaiannya.</p>
+</header>
+<nav class="tabs" id="tabs" aria-label="Pilih sistem bintang"></nav>
+<main>
+  <section class="panggung" id="panggung" aria-label="Peta orbit planet 3D">
+    <canvas id="kanvas"></canvas>
+    <div class="lapis-label" id="lapis-label"></div>
+    <div class="tip" id="tip"></div>
+    <div class="kontrol">
+      <button class="tombol" id="jeda" type="button" aria-pressed="false">Jeda orbit</button>
+      <button class="tombol" id="reset" type="button">Reset kamera</button>
+      <span>Seret untuk memutar, scroll untuk zoom. Jarak orbit memakai skala akar supaya planet dalam tidak menumpuk.</span>
+    </div>
+  </section>
+  <aside id="panel" aria-live="polite"><div id="isi-panel"></div></aside>
+</main>
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+const KRITERIA = { fluksMin: 0.35, fluksMax: 1.10, suhuMin: 175, suhuMax: 275 };
+const DAFTAR_SISTEM = ["TRAPPIST-1", "Kepler-62"];
+
+const WARNA = { kandidat: 0xF5B841, tidak: 0xFF7A6B, data: 0x8190B8 };
+const KELAS = {
+  "Kandidat layak huni": "kandidat",
+  "Tidak layak huni": "tidak",
+  "Data tidak lengkap": "data",
+};
+const SKALA_PLANET = 0.8;
+const POSISI_AWAL = new THREE.Vector3(0, 380, 640);
+
+let DATA = {};
+let daftarAktif = [];
+let sistemAktif = null;
+let planetAktif = null;
+let hoverIndex = null;
+let planetList = [];
+let bintangMesh = null;
+let labelZona = null;
+let titikLabelZona = null;
+let waktu = 0;
+let terakhir = 0;
+let jeda = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+const panggung = document.getElementById("panggung");
+const kanvas = document.getElementById("kanvas");
+const lapisLabel = document.getElementById("lapis-label");
+const tip = document.getElementById("tip");
+const tombolJeda = document.getElementById("jeda");
+const tombolReset = document.getElementById("reset");
+
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const fmt = (x, d) => new Intl.NumberFormat("id-ID", { maximumFractionDigits: d === undefined ? 2 : d }).format(x);
+const fmtFluks = (x) => (x >= 100 ? fmt(x, 0) : x >= 1 ? fmt(x, 2) : fmt(x, 3));
+const kelasStatus = (p) => KELAS[p.status] || "data";
+
+const renderer = new THREE.WebGLRenderer({ canvas: kanvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, 1, 1, 6000);
+camera.position.copy(POSISI_AWAL);
+const controls = new OrbitControls(camera, kanvas);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.minDistance = 80;
+controls.maxDistance = 1500;
+controls.update();
+
+scene.add(new THREE.AmbientLight(0xFFFFFF, 1.0));
+const dunia = new THREE.Group();
+scene.add(dunia);
+
+let lebar = 1;
+let tinggi = 1;
+function ukur() {
+  const r = panggung.getBoundingClientRect();
+  lebar = Math.max(r.width, 1);
+  tinggi = Math.max(r.height, 1);
+  renderer.setSize(lebar, tinggi, false);
+  camera.aspect = lebar / tinggi;
+  camera.updateProjectionMatrix();
+}
+new ResizeObserver(ukur).observe(panggung);
+ukur();
+
+function bintangLatar() {
+  let seed = 7;
+  const acak = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const n = 700;
+  const pos = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) {
+    const th = acak() * Math.PI * 2;
+    const ph = Math.acos(2 * acak() - 1);
+    const r = 3000;
+    pos[i * 3] = r * Math.sin(ph) * Math.cos(th);
+    pos[i * 3 + 1] = r * Math.cos(ph);
+    pos[i * 3 + 2] = r * Math.sin(ph) * Math.sin(th);
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+  const mat = new THREE.PointsMaterial({ color: 0xFFFFFF, size: 1.6, sizeAttenuation: false, transparent: true, opacity: 0.55, depthWrite: false });
+  scene.add(new THREE.Points(geo, mat));
+}
+
+function teksturGlow(hex) {
+  const c = document.createElement("canvas");
+  c.width = c.height = 128;
+  const g = c.getContext("2d");
+  const rgb = ((hex >> 16) & 255) + "," + ((hex >> 8) & 255) + "," + (hex & 255);
+  const gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  gr.addColorStop(0, "rgba(" + rgb + ",0.9)");
+  gr.addColorStop(0.35, "rgba(" + rgb + ",0.28)");
+  gr.addColorStop(1, "rgba(" + rgb + ",0)");
+  g.fillStyle = gr;
+  g.fillRect(0, 0, 128, 128);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+function glow(hex, ukuran, opacity) {
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: teksturGlow(hex),
+    blending: THREE.AdditiveBlending,
+    transparent: true,
+    opacity: opacity === undefined ? 1 : opacity,
+    depthWrite: false,
+  }));
+  s.scale.setScalar(ukuran);
+  return s;
+}
+
+function lingkaran(r, material) {
+  const n = 160;
+  const titik = [];
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2;
+    titik.push(new THREE.Vector3(Math.cos(a) * r, 0, Math.sin(a) * r));
+  }
+  const garis = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(titik), material);
+  if (material.isLineDashedMaterial) garis.computeLineDistances();
+  return garis;
+}
+
+function kosongkan(grup) {
+  grup.traverse((o) => {
+    if (o.geometry) o.geometry.dispose();
+    if (o.material) {
+      if (o.material.map) o.material.map.dispose();
+      o.material.dispose();
+    }
+  });
+  grup.clear();
+}
+
+function skalaJarak(a, aMin, aMax) {
+  const R0 = 70;
+  const R1 = 300;
+  if (!(aMax > aMin)) return (R0 + R1) / 2;
+  const t = Math.max((a - aMin) / (aMax - aMin), 0);
+  return Math.min(R0 + (R1 - R0) * Math.sqrt(t), 340);
+}
+
+function zonaLayakHuni(p) {
+  if (!(p.st_rad > 0 && p.st_teff > 0)) return null;
+  const L = p.st_rad * p.st_rad * Math.pow(p.st_teff / 5772, 4);
+  return { dalam: Math.sqrt(L / KRITERIA.fluksMax), luar: Math.sqrt(L / KRITERIA.fluksMin) };
+}
+
+function warnaBintang(teff) {
+  if (!teff) return 0xFFE08A;
+  if (teff < 3000) return 0xFF6A3D;
+  if (teff < 4000) return 0xFF9A4D;
+  if (teff < 5200) return 0xFFC261;
+  if (teff < 6000) return 0xFFE08A;
+  return 0xFFF4D2;
+}
+
+function posisikan() {
+  planetList.forEach((o) => {
+    const th = o.theta0 + o.omega * waktu;
+    o.mesh.position.set(o.r * Math.cos(th), 0, o.r * Math.sin(th));
+  });
+}
+
+const vTmp = new THREE.Vector3();
+function letakkan(el, vektor, geserY) {
+  vTmp.copy(vektor).project(camera);
+  if (vTmp.z > 1 || vTmp.z < -1) {
+    el.style.display = "none";
+    return;
+  }
+  el.style.display = "block";
+  const x = (vTmp.x * 0.5 + 0.5) * lebar;
+  const y = (-vTmp.y * 0.5 + 0.5) * tinggi + geserY;
+  el.style.transform = "translate(" + x.toFixed(1) + "px," + y.toFixed(1) + "px) translate(-50%,-100%)";
+}
+
+function letakkanLabel() {
+  planetList.forEach((o) => letakkan(o.label, o.mesh.position, -(o.rad + 4)));
+  if (labelZona) letakkan(labelZona, titikLabelZona, -4);
+}
+
+function frame(now) {
+  const dt = Math.min((now - terakhir) / 1000, 0.1);
+  terakhir = now;
+  if (!jeda && hoverIndex === null) {
+    waktu += dt;
+    posisikan();
+  }
+  controls.update();
+  planetList.forEach((o, i) => {
+    o.ring.visible = i === planetAktif || i === hoverIndex;
+    o.ring.material.opacity = i === planetAktif ? 1 : 0.55;
+    o.ring.quaternion.copy(camera.quaternion);
+  });
+  letakkanLabel();
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+
+function tampilTip(e, o) {
+  const r = panggung.getBoundingClientRect();
+  tip.innerHTML = esc(o.data.pl_name) + "<span>" + esc(o.data.status) + "</span>";
+  tip.style.left = e.clientX - r.left + "px";
+  tip.style.top = e.clientY - r.top + "px";
+  tip.classList.add("tampil");
+}
+
+function bangunSistem(nama) {
+  sistemAktif = nama;
+  planetAktif = null;
+  hoverIndex = null;
+  planetList = [];
+  labelZona = null;
+  titikLabelZona = null;
+  kosongkan(dunia);
+  lapisLabel.replaceChildren();
+  tip.classList.remove("tampil");
+
+  const urut = (DATA[nama] || []).slice().sort((x, y) => (x.pl_orbsmax == null ? 1e9 : x.pl_orbsmax) - (y.pl_orbsmax == null ? 1e9 : y.pl_orbsmax));
+  const jarak = urut.map((p) => p.pl_orbsmax).filter((v) => v != null && v > 0);
+  const aMin = Math.min.apply(null, jarak);
+  const aMax = Math.max.apply(null, jarak);
+  const bintang = urut.find((p) => p.st_rad > 0 && p.st_teff > 0) || urut[0] || {};
+
+  const zona = zonaLayakHuni(bintang);
+  if (zona && jarak.length) {
+    const rd = skalaJarak(zona.dalam, aMin, aMax);
+    const rl = skalaJarak(zona.luar, aMin, aMax);
+    const cincin = new THREE.Mesh(
+      new THREE.RingGeometry(rd, rl, 160, 1),
+      new THREE.MeshBasicMaterial({ color: 0xF5B841, transparent: true, opacity: 0.13, side: THREE.DoubleSide, depthWrite: false })
+    );
+    cincin.rotation.x = -Math.PI / 2;
+    cincin.renderOrder = -2;
+    dunia.add(cincin);
+    const tepi = new THREE.LineDashedMaterial({ color: 0xF5B841, transparent: true, opacity: 0.6, dashSize: 6, gapSize: 8 });
+    dunia.add(lingkaran(rd, tepi));
+    dunia.add(lingkaran(rl, tepi));
+    labelZona = document.createElement("div");
+    labelZona.className = "label-zona";
+    labelZona.textContent = "Zona layak huni";
+    lapisLabel.appendChild(labelZona);
+    titikLabelZona = new THREE.Vector3(0, 0, -rl);
+  }
+
+  const rb = 16 + 14 * Math.sqrt(Math.min(bintang.st_rad || 1, 3));
+  const wb = warnaBintang(bintang.st_teff);
+  bintangMesh = new THREE.Mesh(new THREE.SphereGeometry(rb * 0.9, 48, 32), new THREE.MeshBasicMaterial({ color: wb }));
+  dunia.add(bintangMesh);
+  dunia.add(glow(wb, rb * 9, 0.8));
+  dunia.add(glow(0xFFFFFF, rb * 3, 0.7));
+  dunia.add(new THREE.PointLight(wb, 3, 0, 0));
+
+  urut.forEach((p, i) => {
+    const r = skalaJarak(p.pl_orbsmax > 0 ? p.pl_orbsmax : aMax, aMin, aMax);
+    const kelas = kelasStatus(p);
+    const warna = WARNA[kelas];
+    const rp = Math.min(Math.max(5 + 3.2 * Math.sqrt(p.pl_rade > 0 ? p.pl_rade : 1), 5), 22);
+    const rad = rp * SKALA_PLANET;
+
+    const orbit = lingkaran(r, new THREE.LineBasicMaterial({ color: 0x9BA9D8, transparent: true, opacity: 0.25 }));
+    dunia.add(orbit);
+
+    const mesh = new THREE.Mesh(
+      new THREE.SphereGeometry(rad, 32, 24),
+      new THREE.MeshStandardMaterial({ color: warna, emissive: warna, emissiveIntensity: kelas === "data" ? 0.12 : 0.22, roughness: 0.75, metalness: 0 })
+    );
+    dunia.add(mesh);
+
+    if (kelas === "kandidat") mesh.add(glow(warna, rad * 6, 0.9));
+
+    const hit = new THREE.Mesh(
+      new THREE.SphereGeometry(rad + 8, 12, 8),
+      new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })
+    );
+    hit.userData.index = i;
+    mesh.add(hit);
+
+    const ring = new THREE.Mesh(
+      new THREE.RingGeometry(1, 1.12, 48),
+      new THREE.MeshBasicMaterial({ color: 0xEEF1FF, transparent: true, opacity: 1, side: THREE.DoubleSide, depthTest: false })
+    );
+    ring.scale.setScalar(rad + 6);
+    ring.renderOrder = 10;
+    ring.visible = false;
+    mesh.add(ring);
+
+    const label = document.createElement("div");
+    label.className = "huruf";
+    label.textContent = String(p.pl_name).split(" ").pop();
+    lapisLabel.appendChild(label);
+
+    const per = p.pl_orbper > 0 ? p.pl_orbper : 100;
+    planetList.push({ data: p, mesh: mesh, hit: hit, ring: ring, orbit: orbit, label: label, rad: rad, r: r, theta0: i * 2.399, omega: 0.35 / Math.pow(per, 0.35) });
+  });
+
+  posisikan();
+  renderTabs();
+  renderPanel();
+}
+
+function pilih(i) {
+  planetAktif = i === planetAktif ? null : i;
+  planetList.forEach((o, k) => {
+    o.orbit.material.opacity = k === planetAktif ? 0.7 : 0.25;
+  });
+  renderPanel();
+}
+
+const ray = new THREE.Raycaster();
+const ptr = new THREE.Vector2();
+function cari(e) {
+  const r = kanvas.getBoundingClientRect();
+  ptr.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(ptr, camera);
+  const sasaran = [bintangMesh].concat(planetList.map((o) => o.hit));
+  const kena = ray.intersectObjects(sasaran, false)[0];
+  if (!kena || kena.object.userData.index === undefined) return null;
+  return kena.object.userData.index;
+}
+
+let awalTekan = null;
+kanvas.addEventListener("pointerdown", (e) => {
+  awalTekan = { x: e.clientX, y: e.clientY };
+  hoverIndex = null;
+  tip.classList.remove("tampil");
+});
+kanvas.addEventListener("pointerup", (e) => {
+  if (awalTekan && Math.hypot(e.clientX - awalTekan.x, e.clientY - awalTekan.y) < 5) {
+    const i = cari(e);
+    if (i !== null) pilih(i);
+  }
+  awalTekan = null;
+});
+kanvas.addEventListener("pointermove", (e) => {
+  if (e.buttons) return;
+  const i = cari(e);
+  hoverIndex = i;
+  if (i === null) {
+    tip.classList.remove("tampil");
+    kanvas.style.cursor = "";
+  } else {
+    tampilTip(e, planetList[i]);
+    kanvas.style.cursor = "pointer";
+  }
+});
+kanvas.addEventListener("pointerleave", () => {
+  hoverIndex = null;
+  tip.classList.remove("tampil");
+  kanvas.style.cursor = "";
+});
+
+function renderTabs() {
+  const nav = document.getElementById("tabs");
+  nav.replaceChildren();
+  daftarAktif.forEach((nama) => {
+    const daftar = DATA[nama] || [];
+    const kandidat = daftar.filter((p) => kelasStatus(p) === "kandidat").length;
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "tab";
+    b.setAttribute("aria-pressed", nama === sistemAktif ? "true" : "false");
+    b.innerHTML = esc(nama) + "<small>" + daftar.length + " planet, " + kandidat + " kandidat</small>";
+    b.addEventListener("click", () => { if (nama !== sistemAktif) bangunSistem(nama); });
+    nav.appendChild(b);
+  });
+}
+
+function nilaiKriteria(v, min, max) {
+  if (v == null) return null;
+  return v < min ? "rendah" : v > max ? "tinggi" : "ok";
+}
+
+function kalimatKriteria(nama, teksNilai, hasil, batasMin, batasMax) {
+  if (hasil === "ok") return nama + " " + teksNilai + " masuk rentang layak huni.";
+  if (hasil === "rendah") return nama + " " + teksNilai + ", di bawah batas " + batasMin + ", jadi terlalu dingin.";
+  return nama + " " + teksNilai + ", di atas batas " + batasMax + ", jadi terlalu panas.";
+}
+
+function jelaskan(p) {
+  const f = nilaiKriteria(p.pl_insol, KRITERIA.fluksMin, KRITERIA.fluksMax);
+  const s = nilaiKriteria(p.pl_eqt, KRITERIA.suhuMin, KRITERIA.suhuMax);
+  const kF = f ? kalimatKriteria("Fluks cahaya", fmtFluks(p.pl_insol) + " kali Bumi", f, fmt(KRITERIA.fluksMin), fmt(KRITERIA.fluksMax)) : "";
+  const kS = s ? kalimatKriteria("Suhu setimbang", fmt(p.pl_eqt, 0) + " K", s, fmt(KRITERIA.suhuMin, 0) + " K", fmt(KRITERIA.suhuMax, 0) + " K") : "";
+  if (f === "ok" && s === "ok") {
+    return "Fluks cahaya " + fmtFluks(p.pl_insol) + " kali Bumi dan suhu setimbang " + fmt(p.pl_eqt, 0) + " K sama-sama masuk rentang layak huni. Kondisi ini memungkinkan air cair di permukaan, tetapi belum membuktikan ada kehidupan.";
+  }
+  if (f === null || s === null) {
+    const kosong = f === null && s === null ? "fluks cahaya dan suhu setimbang" : f === null ? "fluks cahaya" : "suhu setimbang";
+    return "Katalog belum mencatat " + kosong + " planet ini, jadi belum bisa dinilai. " + (kF || kS);
+  }
+  return (kF + " " + kS).trim();
+}
+
+function posisiGauge(v, lo, hi) {
+  if (!(v > 0)) return 0;
+  const t = (Math.log(v) - Math.log(lo)) / (Math.log(hi) - Math.log(lo));
+  return Math.min(Math.max(t, 0), 1) * 100;
+}
+
+function gauge(judul, nilai, teksNilai, lo, hi, min, max, teksLo, teksHi, ket, kelas) {
+  const kiri = posisiGauge(min, lo, hi);
+  const lebarArea = posisiGauge(max, lo, hi) - kiri;
+  const ada = nilai != null;
+  return '<div class="gauge ' + kelas + '">' +
+    '<div class="gauge-atas"><span>' + judul + "</span><strong>" + (ada ? teksNilai : "tidak tercatat") + "</strong></div>" +
+    '<div class="bar' + (ada ? "" : " kosong") + '">' +
+    '<i class="area" style="left:' + kiri.toFixed(1) + "%;width:" + lebarArea.toFixed(1) + '%"></i>' +
+    (ada ? '<i class="titik" style="left:' + posisiGauge(nilai, lo, hi).toFixed(1) + '%"></i>' : "") +
+    "</div>" +
+    '<div class="gauge-bawah"><span>' + teksLo + "</span><span>" + teksHi + "</span></div>" +
+    '<p class="gauge-ket">' + ket + "</p></div>";
+}
+
+function htmlPlanet(p) {
+  const kelas = kelasStatus(p);
+  const ada = (v, teks) => (v == null ? "tidak tercatat" : teks);
+  return '<div class="' + kelas + '">' +
+    "<h2>" + esc(p.pl_name) + "</h2>" +
+    '<span class="chip"><i></i>' + esc(p.status) + "</span></div>" +
+    "<p>" + jelaskan(p) + "</p>" +
+    gauge("Fluks cahaya", p.pl_insol, fmtFluks(p.pl_insol == null ? 0 : p.pl_insol) + " kali Bumi", 0.01, 1000, KRITERIA.fluksMin, KRITERIA.fluksMax, "0,01", "1.000",
+      "Area kuning: rentang layak huni, " + fmt(KRITERIA.fluksMin) + " sampai " + fmt(KRITERIA.fluksMax) + " kali Bumi.", kelas) +
+    gauge("Suhu setimbang", p.pl_eqt, fmt(p.pl_eqt == null ? 0 : p.pl_eqt, 0) + " K", 50, 3000, KRITERIA.suhuMin, KRITERIA.suhuMax, "50 K", "3.000 K",
+      "Area kuning: rentang layak huni, " + fmt(KRITERIA.suhuMin, 0) + " sampai " + fmt(KRITERIA.suhuMax, 0) + " K.", kelas) +
+    "<dl>" +
+    "<dt>Radius</dt><dd>" + ada(p.pl_rade, fmt(p.pl_rade) + " kali Bumi") + "</dd>" +
+    "<dt>Jarak dari bintang</dt><dd>" + ada(p.pl_orbsmax, fmt(p.pl_orbsmax, 3) + " AU") + "</dd>" +
+    "<dt>Waktu satu orbit</dt><dd>" + ada(p.pl_orbper, fmt(p.pl_orbper) + " hari") + "</dd>" +
+    "</dl>" + htmlCatatan();
+}
+
+function htmlCatatan() {
+  return '<p class="catatan">Batas layak huni yang dipakai: fluks cahaya ' + fmt(KRITERIA.fluksMin) + " sampai " + fmt(KRITERIA.fluksMax) +
+    " kali Bumi dan suhu setimbang " + fmt(KRITERIA.suhuMin, 0) + " sampai " + fmt(KRITERIA.suhuMax, 0) + " K. Sumber data: NASA Exoplanet Archive.</p>";
+}
+
+function htmlKosong() {
+  const daftar = DATA[sistemAktif] || [];
+  const kandidat = daftar.filter((p) => kelasStatus(p) === "kandidat").length;
+  return "<h2>Pilih sebuah planet</h2>" +
+    "<p>Klik planet di peta untuk melihat kenapa planet itu layak huni atau tidak. " + esc(sistemAktif) + " punya " + daftar.length + " planet, " + kandidat + " di antaranya kandidat layak huni.</p>" +
+    '<ul class="legenda">' +
+    '<li class="kandidat"><i></i><div><b>Kandidat layak huni</b><span>Fluks cahaya dan suhu setimbang sama-sama masuk rentang.</span></div></li>' +
+    '<li class="tidak"><i></i><div><b>Tidak layak huni</b><span>Salah satunya berada di luar rentang.</span></div></li>' +
+    '<li class="data"><i></i><div><b>Data tidak lengkap</b><span>Fluks atau suhu belum tercatat di katalog.</span></div></li>' +
+    "</ul>" + htmlCatatan();
+}
+
+function renderPanel() {
+  const isi = document.getElementById("isi-panel");
+  const p = planetAktif === null ? null : planetList[planetAktif].data;
+  isi.innerHTML = p ? htmlPlanet(p) : htmlKosong();
+}
+
+function tampilGalat() {
+  document.getElementById("isi-panel").innerHTML = "<h2>Data belum termuat</h2>" +
+    "<p>Buka halaman ini lewat Live Server, dan pastikan planet_per_sistem.json ada satu folder dengan file ini.</p>";
+}
+
+function aturTombolJeda() {
+  tombolJeda.textContent = jeda ? "Putar orbit" : "Jeda orbit";
+  tombolJeda.setAttribute("aria-pressed", String(jeda));
+}
+tombolJeda.addEventListener("click", () => {
+  jeda = !jeda;
+  aturTombolJeda();
+});
+aturTombolJeda();
+
+tombolReset.addEventListener("click", () => {
+  camera.position.copy(POSISI_AWAL);
+  controls.target.set(0, 0, 0);
+  controls.update();
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && planetAktif !== null) pilih(planetAktif);
+});
+
+async function mulai() {
+  try {
+    const res = await fetch("planet_per_sistem.json");
+    if (!res.ok) throw new Error("gagal memuat data");
+    DATA = await res.json();
+  } catch (e) {
+    tampilGalat();
+    return;
+  }
+  daftarAktif = DAFTAR_SISTEM.filter((n) => DATA[n]);
+  if (!daftarAktif.length) {
+    tampilGalat();
+    return;
+  }
+  bintangLatar();
+  bangunSistem(daftarAktif[0]);
+  terakhir = performance.now();
+  requestAnimationFrame(frame);
+}
+
+mulai();
+</script>
+</body>
+</html>
